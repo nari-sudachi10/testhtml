@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<title>My Apps</title>
+
+<style>
+body {
+    background: #111;
+    color: white;
+    font-family: sans-serif;
+
+    margin: 0;
+    padding: 40px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 50px;
+}
+
+.apps {
+    display: flex;
+    gap: 30px;
+
+    justify-content: center;
+    flex-wrap: wrap;
+
+    margin-top: 50px;
+}
+
+.card {
+    background: #1e1e1e;
+
+    width: 300px;
+    padding: 20px;
+
+    border-radius: 20px;
+
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card img {
+    width: 100%;
+    border-radius: 10px;
+}
+
+.card h2 {
+    margin-top: 15px;
+}
+
+.button {
+    display: inline-block;
+
+    background: cyan;
+    color: black;
+
+    padding: 10px 20px;
+
+    border-radius: 10px;
+
+    text-decoration: none;
+
+    font-weight: bold;
+}
+
+.button:hover {
+    background: white;
+}
+</style>
+</head>
+
+<body>
+
+<h1>My Web Applications</h1>
+
+<div class="apps">
+
+    <div class="card">
+        <img src="app1.png">
+
+        <h2>Chat App</h2>
+
+        <p>
+            リアルタイムチャットアプリ
+        </p>
+
+        <a class="button" href="#">
+            OPEN
+        </a>
+    </div>
+
+    <div class="card">
+        <img src="app2.png">
+
+        <h2>Todo App</h2>
+
+        <p>
+            タスク管理アプリ
+        </p>
+
+        <a class="button" href="#">
+            OPEN
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

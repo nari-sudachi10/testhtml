@@ -1,15 +1,120 @@
-<!DOCKTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
   <head>
     <meta charset="utf-8">
-    <title>My profile</title>
-  <head>
-    <body>
-      <h1> html の練習 </h1>
+    <style>
+      body {
+	  background: #111;
+	  color: white;
+	  font-family: sans-serif;
+	  font-size: 32px;
+
+	  margin: 0;
+	  padding 40px;
+      }
+      
+      h1 {
+	  text-align: center;
+	  font-size: 56px;
+      }
+      
+      .message {
+          background-color: #4682B4;
+          color: white;
+
+          padding: 15px;
+          width: 100%;
+	  font-size: 60px;
+	  font-weight: bold;
+
+	  text-align: center;
+
+          border-radius: 10px;
+      }
+
+      .apps {
+	  display: flex;
+	  gap: 30px;
+
+	  justify-content: center;
+	  flex-wrap: wrap;
+
+	  margin-top: 50px;
+      }
+
+      .card {
+	  background: #1e1e1e;
+
+	  width: 300px;
+	  padding: 20px;
+
+	  border-radius: 20px;
+
+	  transition: 0.3s;
+      }
+
+      .card:hover {
+	  transform: scale(1.05);
+      }
+
+      .card h2 {
+	  margin-top: 15px;
+      }
+
+      .button {
+	  display: inline-block;
+
+	  background: cyan;
+	  color: black;
+
+	  padding: 10px 20px;
+
+	  border-radius: 10px;
+
+	  text-decoration: none;
+
+	  font-weight: bold;
+      }
+
+      .button:hover {
+	  background: white;
+      }
+    </style>
+
+    </style>
+    <title>My homepage</title>
+  </head>
+  
+  <body>
+    <div class="message">
+      Souta Narisawaのホームページ
+    </div>
+    
+    <p>
+      <h1> Web Applications </h1>
+    </p>
+
+    <p>
+    <div class="card">
+
+      <h2> todo-list </h2>
+
       <p>
-	表示
-	</p> <br>
-      <a href="http://www.fureai.or.jp/~irie/html-tag/">htmlタグ一覧</a>　<br>
-      <img src="mimizuku.png" alt="みみずく">
-    </body>
+	やることリスト
+      </p>
+
+      <a class="button" href="https://todo-list-zrf6.onrender.com">
+	OPEN
+      </a>
+    </div>
+    </p>
+
+    <h1> 今後実装予定のもの </h1>
+    <p>
+      ・Webアプリケーション <br>
+      ・ゲーム <br>
+      ・GitHubのマニュアル <br>
+      
+    
+  </body>
 </html>
