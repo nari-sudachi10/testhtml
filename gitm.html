@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <style>
+      body {
+	  font-size: 20px;
+      }
+      
+      pre {
+          background: #1e1e1e;
+          color: #00ff88;
+
+          padding: 15px;
+
+	  font-size: 10px;
+
+          border-radius: 15px;
+
+          overflow-x: auto;
+      }
+
+      code {
+          font-family: monospace;
+          font-size: 16px;
+      }
+    </style>
+
+    <title>Git Hubマニュアル</title>
+
+  </head>
+
+  <body>
+
+    <h1>Git Hubマニュアル(リンク公開)</h1>
+
+    <p>
+      Git Hub(ほぼgit)を使ってリンクを取得する方法
+    </p>
+
+    <p>
+      まず適当なディレクトリを作り、そこにcdコマンドで移動してください。ここではtestというディレクトリを作ります。
+    </p>
+
+    <pre><code>
+	~$ mkdir test
+	~$ cd test
+    </code></pre>
+
+    <p>
+      すきなエディタでindex.htmlという名前のファイルを作って、適当にhtmlのコードを書いてください。以下はサンプルコードです。
+    </p>
+    
+    <pre><code>
+	&lt;html&gt;
+	&lt;head&gt;
+        &lt;title&gt;Git Hubマニュアル&lt;/title&gt;
+	&lt;/head&gt;
+
+	&lt;body&gt;
+        &lt;h1&gt;Git Hubマニュアル(リンク公開)&lt;/h1&gt;
+
+        &lt;p&gt;
+        Git Hub(ほぼgit)を使ってリンクを取得する方法
+        &lt;/p&gt;
+	&lt;/body&gt;
+	&lt;/html&gt;
+    </code></pre>
+
+    <p>
+      GitHubのアカウントを持ってない人は作ってください。<br>
+      ここまで来たら準備は完了です。<br>
+      まずGit初期化します。
+    </p>
+
+    <pre><code>
+	~$ git init  //Git初期化
+	~$ git remote add origin https://github.com/ユーザー名/test.git // GitHubに接続
+    </code></pre>
+
+    <p>
+      これでGitHubと接続できました。次にファイルをアップロードします。
+    </p>
+
+    <pre><code>
+	~$ git add .
+	~$ git commit -m "最初のコミット"
+	~$ git branch -M main
+	~$ git push -u origin main //ここの段階ではできないかも.飛ばしてもOK 
+    </code></pre>
+
+    <p>
+      pushしたときに認証があります。パスワードを取得します。<br>
+
+      1. GitHub右上プロフィール <br>
+      2. Settings <br>
+      3. 一番下Developer settings <br>
+      4. Personal access tokens <br>
+      5. Tokens (classic) <br>
+      6. Generate new token (classic) <br>
+
+      設定: Note->Ubuntu <br>
+      Expiration->30days（これは有効期限です。これが過ぎたら再発行する必要があります。) <br>
+      repoにチェック
+      Generateを押す。
+       
+    </p>
+
+    <p>
+      少しわかりにくいかもしれないので画像を貼っておきます。
+      <img src="developper.png">
+    </p>
+
+    <p>
+      すると1回だけ:
+      <pre><code>
+	  github_pat_xxxxxxxxxxxxxxx
+      </code></pre>
+    </p>
+    <p>
+      みたいに長い文字が出てきます。これがユーザ認証に必要なパスワードです。PATといいます<br>
+      注意: PATは二度と表示されないのでコピーしてメモを取っといてください。
+    </p>
+
+    <pre><code>
+	~$ git add .
+	~$ git commit -m "最初のコミット"
+	~$ git branch -M main
+	~$ git push -u origin main  
+    </code></pre>
+
+    <pre><code>
+	Username: ユーザー名
+	Password: ここにPATを貼ってださい
+    </code></pre>
+
+    <p>
+      これでGitHubへのアップロードができました。ここまできたらあと少しです。<br>
+      GitHubのページを開いてください。リポジトリの設定バーを選択してください。<br>
+      次にPagesを選択してください。<br>
+      そこでSourceをDeploy from a branchにしてください <br>
+      Branchをmain,フォルダーを/(root)にしてください Saveを押します<br>
+      30秒から1分待つと
+      <pre><code>
+	  Your site is live at
+	  https://ユーザー名.github.io/リポジトリ名/
+      </code></pre>
+      が出てきます。<br>
+      
+
+      わかりにくいかもしれないので以下に画像を貼っておきます。
+    </p>
+
+    <img src="deploy.png">
+
+    <p>
+      https://ユーザー名.github.io/リポジトリ名/ブラウザで試してみてください。htmlファイルが実行されたやつが出てきたら成功です。<br>
+      htmlを修正したら
+      <pre><code>
+	  ~$ git add .
+	  ~$ commit -m "更新内容"
+	  ~$ git push
+      </code></pre>
+      で変更できます。これで終わります。
+    </p>
+    
+
+  </body>
+</html>
