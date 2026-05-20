@@ -10,7 +10,7 @@
 	  font-size: 32px;
 
 	  margin: 0;
-	  padding 40px;
+	  padding: 40px;
       }
       
       h1 {
@@ -35,9 +35,9 @@
       .apps {
 	  display: flex;
 	  gap: 30px;
-
-	  justify-content: center;
-	  flex-wrap: wrap;
+	  
+	  justify-content: flex-start;
+	  flex-wrap: nowrap;
 
 	  margin-top: 50px;
       }
@@ -81,20 +81,19 @@
       }
     </style>
 
-    </style>
     <title>My homepage</title>
   </head>
-  
-  <body>
-    <div class="message">
-      Souta Narisawaのホームページ
-    </div>
-    
-    <p>
-      <h1> Web Applications </h1>
-    </p>
 
-    <p>
+<body>
+  <div class="message">
+    Souta Narisawaのホームページ
+  </div>
+  
+  <p>
+    <h1> Web Applications </h1>
+  </p>
+
+  <div class="apps">
     <div class="card">
 
       <h2> todo-list </h2>
@@ -107,11 +106,21 @@
 	OPEN
       </a>
     </div>
-    </p>
 
-    <h1> GitHub(Git)マニュアル </h1>
-    
-    <p>
+    <div class="card">
+      <h2>画像解析</h2>
+      <p>
+	まだ利用できません
+      </p>
+      <a class="button" href="">
+	OPEN
+      </a>
+    </div>
+  </div>
+  
+  <h1> GitHub(Git)マニュアル </h1>
+  
+  <p>
       <div class="card">
 	<h2> GitHubマニュアル公開編 </h2>
 	<a class="button" href="./gitm.html">
