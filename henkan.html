@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像変換ツール</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+      :root{
+	  --bg:#0f172a;
+	  --card:#1e293b;
+	  --border:#334155;
+	  --text:#f8fafc;
+	  --accent:#6366f1;
+	  --accent-hover:#4f46e5;
+      }
+
+      *{
+	  margin:0;
+	  padding:0;
+	  box-sizing:border-box;
+      }
+
+      body{
+	  background:var(--bg);
+	  color:var(--text);
+	  font-family:sans-serif;
+	  min-height:100vh;
+	  display:flex;
+	  justify-content:center;
+	  align-items:center;
+	  padding:20px;
+      }
+
+      .container{
+	  width:100%;
+	  max-width:800px;
+      }
+
+      .card{
+	  background:var(--card);
+	  border:1px solid var(--border);
+	  border-radius:20px;
+	  padding:30px;
+      }
+
+      h1{
+	  text-align:center;
+	  margin-bottom:25px;
+      }
+
+      .dropzone{
+	  display:block;
+	  width:100%;
+	  border:2px dashed var(--border);
+	  border-radius:15px;
+	  padding:50px 20px;
+	  text-align:center;
+	  cursor:pointer;
+	  transition:.3s;
+      }
+
+      .dropzone:hover{
+	  border-color:var(--accent);
+      }
+
+      .dropzone.dragover{
+	  border-color:var(--accent);
+	  background:rgba(99,102,241,.1);
+      }
+
+      .dropzone p{
+	  margin:6px 0;
+      }
+
+      input[type=file]{
+	  display:none;
+      }
+
+      .controls{
+	  display:flex;
+	  gap:10px;
+	  margin-top:20px;
+      }
+
+      select{
+	  flex:1;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      font-size:16px;
+      }
+
+      button{
+	  padding:12px 20px;
+	  border:none;
+	  border-radius:10px;
+	  background:var(--accent);
+	  color:white;
+	  cursor:pointer;
+	  font-size:16px;
+      }
+
+      button:hover{
+	  background:var(--accent-hover);
+      }
+
+      button:disabled{
+	  opacity:.5;
+	  cursor:not-allowed;
+      }
+
+      .info{
+	  margin-top:20px;
+	  text-align:center;
+	  color:#94a3b8;
+      }
+
+      .preview-grid{
+	  display:grid;
+	  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+      gap:10px;
+      margin-top:20px;
+      }
+
+      .preview-grid img{
+	  width:100%;
+	  height:120px;
+	  object-fit:cover;
+	  border-radius:10px;
+	  border:1px solid var(--border);
+      }
+
+      .preview-item{
+	  position:relative;
+      }
+
+      .preview-item img{
+	  width:100%;
+	  height:120px;
+	  object-fit:cover;
+	  border-radius:10px;
+      }
+
+      .file-name{
+	  margin-top:4px;
+	  font-size:12px;
+	  text-align:center;
+	  color:#cbd5e1;
+
+	  overflow:hidden;
+	  text-overflow:ellipsis;
+	  white-space:nowrap;
+      }
+      
+      .remove-btn{
+      position:absolute;
+      top:6px;
+      right:6px;
+
+      width:28px;
+      height:28px;
+
+      border:none;
+      border-radius:50%;
+
+      background:rgba(0,0,0,.7);
+      color:#fff;
+
+      cursor:pointer;
+
+      display:flex;
+      align-items:center;
+      justify-content:center;
+
+      font-size:16px;
+      font-weight:bold;
+      }
+
+      .remove-btn:hover{
+      background:#ef4444;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+
+      <div class="card">
+
+	<h1>🖼 画像変換ツール</h1>
+
+	<label class="dropzone" id="dropzone">
+	  <p>画像をドラッグ＆ドロップ</p>
+	  <p>またはクリックして選択</p>
+
+	  <input
+            type="file"
+            id="fileInput"
+            multiple
+            accept="image/png,image/jpeg,image/webp"
+	    >
+	</label>
+
+	<div class="controls">
+
+	  <select id="format">
+	    <option value="png">PNG</option>
+	    <option value="jpeg">JPG</option>
+	    <option value="webp">WEBP</option>
+	  </select>
+
+	  <button id="clearBtn">
+	    クリア
+	  </button>
+
+	  <button id="convertBtn">
+	    変換して保存
+	  </button>
+
+	</div>
+
+	<div class="info" id="fileInfo">
+	  ファイル未選択
+	</div>
+
+	<div class="preview-grid" id="previewGrid"></div>
+
+      </div>
+
+    </div>
+
+    <script>
+
+      const fileInput = document.getElementById("fileInput");
+      const dropzone = document.getElementById("dropzone");
+      const previewGrid = document.getElementById("previewGrid");
+      const formatSelect = document.getElementById("format");
+      const convertBtn = document.getElementById("convertBtn");
+      const fileInfo = document.getElementById("fileInfo");
+      const clearBtn = document.getElementById("clearBtn");
+
+      let imageFiles = [];
+
+      /* ------------------------------
+	 ドラッグ＆ドロップ
+	 ------------------------------ */
+
+      dropzone.addEventListener("click", () => {
+	  fileInput.click();
+      });
+
+      fileInput.addEventListener("change", (e) => {
+	  setFiles([...e.target.files]);
+      });
+
+      dropzone.addEventListener("dragover", (e) => {
+	  e.preventDefault();
+	  dropzone.classList.add("dragover");
+      });
+
+      dropzone.addEventListener("dragleave", () => {
+	  dropzone.classList.remove("dragover");
+      });
+
+      dropzone.addEventListener("drop", (e) => {
+
+	  e.preventDefault();
+
+	  dropzone.classList.remove("dragover");
+
+	  const files = [...e.dataTransfer.files]
+		.filter(file => file.type.startsWith("image/"));
+
+	  setFiles(files);
+      });
+
+      /* ------------------------------
+	 ファイル管理
+	 ------------------------------ */
+
+      function setFiles(files){
+
+	  imageFiles = files;
+
+	  fileInfo.textContent =
+              files.length
+              ? `${files.length}枚の画像を選択`
+              : "ファイル未選択";
+
+	  renderPreview();
+	  updateButtonText();
+      }
+
+      function updateButtonText(){
+
+	  if(imageFiles.length <= 1){
+
+              convertBtn.textContent =
+		  "変換して保存";
+
+	  }else{
+
+              convertBtn.textContent =
+		  "変換してZIP保存";
+	  }
+      }
+
+      /* ------------------------------
+	 プレビュー
+	 ------------------------------ */
+
+      function renderPreview(){
+
+	  previewGrid.innerHTML = "";
+
+	  imageFiles.forEach((file,index)=>{
+
+              const reader = new FileReader();
+
+              reader.onload = e => {
+
+		  const wrapper =
+			document.createElement("div");
+
+		  wrapper.className =
+                      "preview-item";
+
+		  const img =
+			document.createElement("img");
+
+		  img.src = e.target.result;
+
+		  const removeBtn =
+			document.createElement("button");
+
+		  removeBtn.className =
+                      "remove-btn";
+
+		  removeBtn.innerHTML = "×";
+
+		  removeBtn.addEventListener("click",()=>{
+
+                      imageFiles.splice(index,1);
+
+                      fileInfo.textContent =
+			  imageFiles.length
+			  ? `${imageFiles.length}枚の画像を選択`
+			  : "ファイル未選択";
+
+                      updateButtonText();
+                      renderPreview();
+		  });
+
+		  const fileName =
+			document.createElement("div");
+
+		  fileName.className =
+                      "file-name";
+
+		  fileName.textContent =
+                      file.name;
+
+		  wrapper.appendChild(img);
+		  wrapper.appendChild(removeBtn);
+		  wrapper.appendChild(fileName);
+
+		  previewGrid.appendChild(wrapper);
+              };
+
+              reader.readAsDataURL(file);
+	  });
+      }
+
+      /* ------------------------------
+	 クリア
+	 ------------------------------ */
+
+      clearBtn.addEventListener("click",()=>{
+
+	  imageFiles = [];
+
+	  previewGrid.innerHTML = "";
+
+	  fileInfo.textContent =
+              "ファイル未選択";
+
+	  updateButtonText();
+      });
+
+      /* ------------------------------
+	 変換
+	 ------------------------------ */
+
+      convertBtn.addEventListener("click", async () => {
+
+	  if(imageFiles.length === 0){
+
+              alert("画像を選択してください");
+              return;
+	  }
+
+	  convertBtn.disabled = true;
+	  convertBtn.textContent = "変換中...";
+
+	  try{
+
+              const format =
+		    formatSelect.value;
+
+              /* 1枚だけ */
+              if(imageFiles.length === 1){
+
+		  const file =
+			imageFiles[0];
+
+		  const blob =
+			await convertImage(
+			    file,
+			    format
+			);
+
+		  const ext =
+			format === "jpeg"
+			? "jpg"
+			: format;
+
+		  const baseName =
+			file.name.replace(
+			    /\.[^/.]+$/,
+			    ""
+			);
+
+		  downloadBlob(
+                      blob,
+                      `${baseName}.${ext}`
+		  );
+              }
+
+              /* 複数 */
+              else{
+
+		  const zip =
+			new JSZip();
+
+		  for(const file of imageFiles){
+
+                      const blob =
+			    await convertImage(
+				file,
+				format
+			    );
+
+                      const ext =
+			    format === "jpeg"
+			    ? "jpg"
+			    : format;
+
+                      const baseName =
+			    file.name.replace(
+				/\.[^/.]+$/,
+				""
+			    );
+
+                      zip.file(
+			  `${baseName}.${ext}`,
+			  blob
+                      );
+		  }
+
+		  const zipBlob =
+			await zip.generateAsync({
+			    type:"blob"
+			});
+
+		  downloadBlob(
+                      zipBlob,
+                      "converted-images.zip"
+		  );
+              }
+
+	  }catch(error){
+
+              console.error(error);
+
+              alert("変換エラー");
+
+	  }finally{
+
+              convertBtn.disabled = false;
+
+              updateButtonText();
+	  }
+      });
+
+      /* ------------------------------
+	 共通関数
+	 ------------------------------ */
+
+      async function convertImage(
+	  file,
+	  format
+      ){
+
+	  const dataUrl =
+		await readFile(file);
+
+	  const img =
+		await loadImage(dataUrl);
+
+	  const canvas =
+		document.createElement("canvas");
+
+	  const ctx =
+		canvas.getContext("2d");
+
+	  canvas.width =
+              img.width;
+
+	  canvas.height =
+              img.height;
+
+	  if(format === "jpeg"){
+
+              ctx.fillStyle =
+		  "#ffffff";
+
+              ctx.fillRect(
+		  0,
+		  0,
+		  canvas.width,
+		  canvas.height
+              );
+	  }
+
+	  ctx.drawImage(
+              img,
+              0,
+              0
+	  );
+
+	  return canvasToBlob(
+              canvas,
+              `image/${format}`
+	  );
+      }
+
+      function readFile(file){
+
+	  return new Promise(resolve=>{
+
+              const reader =
+		    new FileReader();
+
+              reader.onload =
+		  e => resolve(
+                      e.target.result
+		  );
+
+              reader.readAsDataURL(
+		  file
+              );
+	  });
+      }
+
+      function loadImage(src){
+
+	  return new Promise(resolve=>{
+
+              const img =
+		    new Image();
+
+              img.onload =
+		  () => resolve(img);
+
+              img.src = src;
+	  });
+      }
+
+      function canvasToBlob(
+	  canvas,
+	  mimeType
+      ){
+
+	  return new Promise(resolve=>{
+
+              canvas.toBlob(
+		  resolve,
+		  mimeType,
+		  0.92
+              );
+	  });
+      }
+
+      function downloadBlob(
+	  blob,
+	  filename
+      ){
+
+	  const url =
+		URL.createObjectURL(blob);
+
+	  const a =
+		document.createElement("a");
+
+	  document.body.appendChild(a);
+	  a.click();
+	  a.remove();
+
+	  a.href = url;
+	  a.download = filename;
+
+	  a.click();
+
+	  URL.revokeObjectURL(url);
+      }
+    </script>
+
+  </body>
+</html>
