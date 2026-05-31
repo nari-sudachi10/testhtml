@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>JSON Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f5f5f5;
+      color: #222;
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    button,
+    input {
+      font: inherit;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: white;
+      color: #222;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: #eee;
+    }
+
+    input {
+      min-width: 220px;
+      flex: 1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 420px;
+      box-sizing: border-box;
+      padding: 16px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      resize: vertical;
+      background: white;
+      color: #222;
+    }
+
+    .status {
+      margin-top: 10px;
+      min-height: 24px;
+      font-weight: 600;
+    }
+
+    .ok {
+      color: #16803c;
+    }
+
+    .error {
+      color: #c62828;
+    }
+
+    .info {
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+    }
+
+    mark {
+      background: #ffe066;
+      color: #222;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #111;
+        color: #eee;
+      }
+
+      button,
+      input,
+      textarea,
+      .info {
+        background: #1c1c1c;
+        color: #eee;
+        border-color: #444;
+      }
+
+      button:hover {
+        background: #2a2a2a;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>JSON Tool</h1>
+
+    <div class="toolbar">
+      <button id="formatBtn">整形</button>
+      <button id="minifyBtn">圧縮</button>
+      <button id="validateBtn">検証</button>
+      <button id="copyBtn">コピー</button>
+      <button id="clearBtn">クリア</button>
+      <input id="searchInput" type="search" placeholder="キーや値を検索">
+    </div>
+
+    <textarea id="jsonInput" spellcheck="false" placeholder='{"name":"Taro","skills":["JavaScript","PHP"]}'></textarea>
+
+    <div id="status" class="status"></div>
+
+    <section class="info">
+      <strong>できること:</strong>
+      JSONの整形、圧縮、構文チェック、コピー、文字列検索。
+      入力内容は外部に送信されません。
+    </section>
+  </main>
+
+  <script>
+    const textarea = document.getElementById("jsonInput");
+    const statusEl = document.getElementById("status");
+    const searchInput = document.getElementById("searchInput");
+
+    const setStatus = (message, type = "") => {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+    };
+
+    const parseJson = () => {
+      const value = textarea.value.trim();
+
+      if (!value) {
+        throw new Error("JSONが入力されていません。");
+      }
+
+      return JSON.parse(value);
+    };
+
+    const formatJson = () => {
+      try {
+        const parsed = parseJson();
+        textarea.value = JSON.stringify(parsed, null, 2);
+        setStatus("JSONを整形しました。", "ok");
+      } catch (error) {
+        setStatus(`エラー: ${error.message}`, "error");
+      }
+    };
+
+    const minifyJson = () => {
+      try {
+        const parsed = parseJson();
+        textarea.value = JSON.stringify(parsed);
+        setStatus("JSONを圧縮しました。", "ok");
+      } catch (error) {
+        setStatus(`エラー: ${error.message}`, "error");
+      }
+    };
+
+    const validateJson = () => {
+      try {
+        parseJson();
+        setStatus("有効なJSONです。", "ok");
+      } catch (error) {
+        setStatus(`無効なJSONです: ${error.message}`, "error");
+      }
+    };
+
+    const copyText = async () => {
+      try {
+        await navigator.clipboard.writeText(textarea.value);
+        setStatus("クリップボードにコピーしました。", "ok");
+      } catch {
+        textarea.select();
+        document.execCommand("copy");
+        setStatus("コピーしました。", "ok");
+      }
+    };
+
+    const clearText = () => {
+      textarea.value = "";
+      searchInput.value = "";
+      setStatus("クリアしました。");
+    };
+
+    const searchText = () => {
+      const keyword = searchInput.value;
+
+      if (!keyword) {
+        setStatus("");
+        return;
+      }
+
+      const text = textarea.value;
+      const index = text.toLowerCase().indexOf(keyword.toLowerCase());
+
+      if (index === -1) {
+        setStatus(`"${keyword}" は見つかりませんでした。`, "error");
+        return;
+      }
+
+      textarea.focus();
+      textarea.setSelectionRange(index, index + keyword.length);
+      setStatus(`"${keyword}" を選択しました。`, "ok");
+    };
+
+    document.getElementById("formatBtn").addEventListener("click", formatJson);
+    document.getElementById("minifyBtn").addEventListener("click", minifyJson);
+    document.getElementById("validateBtn").addEventListener("click", validateJson);
+    document.getElementById("copyBtn").addEventListener("click", copyText);
+    document.getElementById("clearBtn").addEventListener("click", clearText);
+    searchInput.addEventListener("input", searchText);
+
+    textarea.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        formatJson();
+      }
+    });
+  </script>
+</body>
+</html>

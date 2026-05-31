@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Image Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+  <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+  <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap)" rel="stylesheet">
+  <style>
+    :root {
+      --bg-0: #0a0a0f;
+      --bg-1: #12121a;
+      --bg-2: #1a1a25;
+      --panel: rgba(26, 26, 37, 0.7);
+      --panel-border: rgba(255, 255, 255, 0.06);
+      --text: #e8e8f0;
+      --text-dim: #8a8aa0;
+      --text-faint: #5a5a70;
+      --accent: #a78bfa;
+      --accent-2: #f472b6;
+      --accent-glow: rgba(167, 139, 250, 0.4);
+      --danger: #f87171;
+      --success: #34d399;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px 24px;
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg-0);
+      background-image:
+        radial-gradient(circle at 20% 0%, rgba(167, 139, 250, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 100%, rgba(244, 114, 182, 0.12), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.08), transparent 70%);
+      background-attachment: fixed;
+    }
+
+    .app {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 6px 12px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 999px;
+      backdrop-filter: blur(20px);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar {
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--text-faint) transparent;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--text-faint);
+      border-radius: 3px;
+    }
+
+    .group {
+      margin-bottom: 22px;
+    }
+
+    .group:last-child {
+      margin-bottom: 0;
+    }
+
+    .group h2 {
+      margin: 0 0 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-faint);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group h2::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 14px 0 8px;
+      color: var(--text-dim);
+    }
+
+    .value {
+      float: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      cursor: pointer;
+      border: 2px solid var(--bg-1);
+      box-shadow: 0 0 12px var(--accent-glow);
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--bg-1);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    button,
+    .file-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    button:hover,
+    .file-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+      transform: translateY(-1px);
+    }
+
+    button:active,
+    .file-btn:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .full {
+      width: 100%;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      border: none;
+      font-weight: 600;
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .primary:hover {
+      box-shadow: 0 6px 28px var(--accent-glow);
+      filter: brightness(1.1);
+    }
+
+    .canvas-wrap {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 24px;
+      min-height: 540px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      position: relative;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 72vh;
+      background:
+        repeating-conic-gradient(rgba(255, 255, 255, 0.04) 0% 25%, rgba(255, 255, 255, 0.02) 0% 50%)
+        50% / 24px 24px;
+      border-radius: 12px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      cursor: crosshair;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-faint);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .empty-hint {
+      font-size: 13px;
+    }
+
+    input[type="text"],
+    select {
+      font: inherit;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="color"] {
+      width: 44px;
+      height: 40px;
+      padding: 2px;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+    }
+
+    .inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .inline select {
+      flex: 1;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 12px 20px;
+      background: rgba(26, 26, 37, 0.95);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Image Editor</h1>
+      <span class="badge">Local · No upload</span>
+    </header>
+
+    <div class="layout">
+      <aside class="panel sidebar">
+        <div class="group">
+          <h2>ファイル</h2>
+          <label for="fileInput" class="file-btn primary full">画像を読み込む</label>
+          <input id="fileInput" type="file" accept="image/*">
+        </div>
+
+        <div class="group">
+          <h2>調整</h2>
+          <label>明るさ <span class="value" id="brightnessVal">100%</span></label>
+          <input id="brightness" type="range" min="0" max="200" value="100">
+
+          <label>コントラスト <span class="value" id="contrastVal">100%</span></label>
+          <input id="contrast" type="range" min="0" max="200" value="100">
+
+          <label>彩度 <span class="value" id="saturateVal">100%</span></label>
+          <input id="saturate" type="range" min="0" max="200" value="100">
+
+          <label>ぼかし <span class="value" id="blurVal">0px</span></label>
+          <input id="blur" type="range" min="0" max="20" value="0">
+        </div>
+
+        <div class="group">
+          <h2>フィルター</h2>
+          <select id="filterPreset">
+            <option value="none">なし</option>
+            <option value="grayscale">モノクロ</option>
+            <option value="sepia">セピア</option>
+            <option value="invert">反転</option>
+            <option value="vintage">ビンテージ</option>
+            <option value="cool">クール</option>
+            <option value="warm">ウォーム</option>
+          </select>
+        </div>
+
+        <div class="group">
+          <h2>変形</h2>
+          <div class="btn-row">
+            <button id="rotateLeft">↺ 左90°</button>
+            <button id="rotateRight">↻ 右90°</button>
+            <button id="flipH">⇆ 左右</button>
+            <button id="flipV">⇅ 上下</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <h2>テキスト追加</h2>
+          <input id="textInput" type="text" placeholder="文字を入力">
+          <div class="inline" style="margin-top:8px;">
+            <input id="textColor" type="color" value="#ffffff">
+            <select id="textSize">
+              <option value="24">24px</option>
+              <option value="36" selected>36px</option>
+              <option value="48">48px</option>
+              <option value="72">72px</option>
+              <option value="120">120px</option>
+            </select>
+          </div>
+          <button id="addText" class="full" style="margin-top:8px;">中央に追加</button>
+        </div>
+
+        <div class="group">
+          <h2>出力</h2>
+          <div class="btn-row">
+            <button id="reset">リセット</button>
+            <button id="download" class="primary">保存</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas-wrap" id="canvasWrap">
+        <div class="empty" id="empty">
+          <div class="empty-icon">🖼</div>
+          <div class="empty-title">画像が選択されていません</div>
+          <div class="empty-hint">左のパネルから画像を読み込んで開始</div>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const empty = document.getElementById("empty");
+    const fileInput = document.getElementById("fileInput");
+    const toast = document.getElementById("toast");
+
+    const sliders = {
+      brightness: document.getElementById("brightness"),
+      contrast: document.getElementById("contrast"),
+      saturate: document.getElementById("saturate"),
+      blur: document.getElementById("blur"),
+    };
+
+    const valueLabels = {
+      brightness: document.getElementById("brightnessVal"),
+      contrast: document.getElementById("contrastVal"),
+      saturate: document.getElementById("saturateVal"),
+      blur: document.getElementById("blurVal"),
+    };
+
+    const filterPreset = document.getElementById("filterPreset");
+
+    const state = {
+      image: null,
+      rotation: 0,
+      flipH: false,
+      flipV: false,
+      texts: [],
+    };
+
+    let toastTimer = null;
+    const showToast = (message) => {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2000);
+    };
+
+    const buildFilter = () => {
+      const presets = {
+        none: "",
+        grayscale: "grayscale(100%)",
+        sepia: "sepia(80%)",
+        invert: "invert(100%)",
+        vintage: "sepia(40%) contrast(110%) brightness(105%)",
+        cool: "hue-rotate(180deg) saturate(120%)",
+        warm: "hue-rotate(-15deg) saturate(130%) brightness(105%)",
+      };
+
+      const base = [
+        `brightness(${sliders.brightness.value}%)`,
+        `contrast(${sliders.contrast.value}%)`,
+        `saturate(${sliders.saturate.value}%)`,
+        `blur(${sliders.blur.value}px)`,
+      ].join(" ");
+
+      const preset = presets[filterPreset.value] ?? "";
+      return `${base} ${preset}`.trim();
+    };
+
+    const render = () => {
+      if (!state.image) return;
+
+      const img = state.image;
+      const rotated = state.rotation % 180 !== 0;
+      const w = rotated ? img.height : img.width;
+      const h = rotated ? img.width : img.height;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      ctx.save();
+      ctx.filter = buildFilter();
+      ctx.translate(w / 2, h / 2);
+      ctx.rotate((state.rotation * Math.PI) / 180);
+      ctx.scale(state.flipH ? -1 : 1, state.flipV ? -1 : 1);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      ctx.restore();
+
+      ctx.filter = "none";
+      for (const t of state.texts) {
+        ctx.font = `bold ${t.size}px "Inter", system-ui, sans-serif`;
+        ctx.fillStyle = t.color;
+        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.lineWidth = Math.max(2, t.size / 16);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.strokeText(t.text, t.x, t.y);
+        ctx.fillText(t.text, t.x, t.y);
+      }
+    };
+
+    const loadImage = (file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          state.image = img;
+          state.rotation = 0;
+          state.flipH = false;
+          state.flipV = false;
+          state.texts = [];
+          empty.style.display = "none";
+          canvas.style.display = "block";
+          render();
+          showToast("画像を読み込みました");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) loadImage(file);
+    });
+
+    for (const [key, slider] of Object.entries(sliders)) {
+      slider.addEventListener("input", () => {
+        const unit = key === "blur" ? "px" : "%";
+        valueLabels[key].textContent = slider.value + unit;
+        render();
+      });
+    }
+
+    filterPreset.addEventListener("change", render);
+
+    document.getElementById("rotateLeft").addEventListener("click", () => {
+      state.rotation = (state.rotation - 90 + 360) % 360;
+      render();
+    });
+
+    document.getElementById("rotateRight").addEventListener("click", () => {
+      state.rotation = (state.rotation + 90) % 360;
+      render();
+    });
+
+    document.getElementById("flipH").addEventListener("click", () => {
+      state.flipH = !state.flipH;
+      render();
+    });
+
+    document.getElementById("flipV").addEventListener("click", () => {
+      state.flipV = !state.flipV;
+      render();
+    });
+
+    document.getElementById("addText").addEventListener("click", () => {
+      const text = document.getElementById("textInput").value.trim();
+      if (!text || !state.image) return;
+
+      state.texts.push({
+        text,
+        color: document.getElementById("textColor").value,
+        size: Number(document.getElementById("textSize").value),
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+      });
+      render();
+      showToast("テキストを追加 · ドラッグで移動可能");
+    });
+
+    canvas.addEventListener("mousedown", (e) => {
+      if (state.texts.length === 0) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+
+      let target = null;
+      for (let i = state.texts.length - 1; i >= 0; i--) {
+        const t = state.texts[i];
+        if (Math.hypot(t.x - mx, t.y - my) < t.size * 1.5) {
+          target = t;
+          break;
+        }
+      }
+      if (!target) return;
+
+      const onMove = (ev) => {
+        target.x = (ev.clientX - rect.left) * scaleX;
+        target.y = (ev.clientY - rect.top) * scaleY;
+        render();
+      };
+      const onUp = () => {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+      };
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      if (!state.image) return;
+
+      for (const [key, slider] of Object.entries(sliders)) {
+        slider.value = key === "blur" ? 0 : 100;
+        const unit = key === "blur" ? "px" : "%";
+        valueLabels[key].textContent = slider.value + unit;
+      }
+      filterPreset.value = "none";
+      state.rotation = 0;
+      state.flipH = false;
+      state.flipV = false;
+      state.texts = [];
+      render();
+      showToast("リセットしました");
+    });
+
+    document.getElementById("download").addEventListener("click", () => {
+      if (!state.image) return;
+
+      const link = document.createElement("a");
+      link.download = `edited-${Date.now()}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      showToast("保存しました");
+    });
+  </script>
+</body>
+</html>
