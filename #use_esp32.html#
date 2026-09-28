@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <style>
+      
+    <title>ESP32の準備</title>
+  </head>
+
+  <body>
+    <section class="esp32-section">
+  <h2>ESP32をUbuntuで使えるようにする</h2>
+
+  <p>
+    ESP32-S3を使って、センサーから温度・湿度などのデータを取得する
+    実験環境を構築しました。
+  </p>
+
+  <h3>1. 使用したもの</h3>
+  <ul>
+    <li>ESP32-S3 WROOM</li>
+    <li>ブレッドボード</li>
+    <li>ジャンパーワイヤー</li>
+    <li>I2C接続のセンサーモジュール</li>
+    <li>USB Type-Cケーブル</li>
+    <li>Ubuntu PC</li>
+  </ul>
+
+  <img src="esp32set.jpeg" alt="使用したもの" title="esp32とブレッドボード、ジャンパーワイヤ" width="700" height="450">
+
+  <h3>2. ESP32とセンサーを接続</h3>
+
+  <p>
+    ESP32-S3とセンサーをブレッドボードに配置し、
+    I2C通信を利用して接続しました。
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>センサー</th>
+        <th>ESP32-S3</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>VDD</td>
+        <td>3V3</td>
+      </tr>
+      <tr>
+        <td>SDA</td>
+        <td>GPIO 8</td>
+      </tr>
+      <tr>
+        <td>GND</td>
+        <td>GND</td>
+      </tr>
+      <tr>
+        <td>SCL</td>
+        <td>GPIO 9</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    電源には5Vではなく3.3V（3V3）を使用しました。
+  </p>
+
+  <img src="haisen.jpeg" alt="配線" title="配線" width="700" height="450">
+
+  <h3>3. UbuntuからESP32を認識できるか確認</h3>
+
+  <p>
+    ESP32をUSBでUbuntu PCに接続し、以下のコマンドでUSB機器を確認しました。
+  </p>
+
+  <pre><code>lsusb</code></pre>
+
+  <p>
+    ESP32を接続すると、以下のようなデバイスが確認できました。
+  </p>
+
+  <pre><code>QinHeng Electronics USB Single Serial</code></pre>
+
+  <p>
+    さらにカーネルログを確認すると、
+    ESP32がUSBシリアルデバイスとして認識されていました。
+  </p>
+
+  <pre><code>sudo dmesg | tail -30</code></pre>
+
+  <pre><code>cdc_acm 3-4:1.0: ttyACM0: USB ACM device</code></pre>
+
+  <p>
+    これにより、ESP32は
+    <code>/dev/ttyACM0</code>
+    として認識されていることを確認しました。
+  </p>
+
+  <h3>4. Arduino IDEをインストール</h3>
+
+  <p>
+    UbuntuにArduino IDEをインストールしました。
+  </p>
+
+  <p>
+    Arduino IDEはESP32のプログラムを書き込み、
+    シリアルモニターでデータを確認するために使用します。
+  </p>
+
+  <h3>5. ESP32用ボードパッケージを追加</h3>
+
+  <p>
+    Arduino IDEの
+    <strong>File → Preferences</strong>
+    を開き、
+    <strong>Additional Board Manager URLs</strong>
+    にESP32用のURLを追加しました。
+  </p>
+
+  <pre><code>https://espressif.github.io/arduino-esp32/package_esp32_index.json</code></pre>
+
+  <p>
+    その後、
+    <strong>Tools → Board → Boards Manager</strong>
+    から
+    <strong>esp32 by Espressif Systems</strong>
+    をインストールしました。
+  </p>
+
+  <h3>6. ESP32-S3をArduino IDEで使用する準備</h3>
+
+  <p>
+    ESP32用ボードパッケージのインストール後、
+    ESP32-S3用のボードを選択します。
+  </p>
+
+  <pre><code>Tools
+  → Board
+    → ESP32 Arduino
+      → ESP32S3 Dev Module</code></pre>
+
+  <p>
+    また、USBポートとして
+    <code>/dev/ttyACM0</code>
+    を選択します。
+  </p>
+
+  <h3>7. 今後の実験</h3>
+
+  <p>
+    環境構築が完了したため、今後はESP32-S3からセンサーの値を取得し、
+    温度・湿度などのデータを確認する実験を行います。
+  </p>
+
+  <p>
+    最終的にはESP32をWi-Fiに接続し、
+    センサーのデータをWebブラウザから確認できるシステムへの発展を目指します。
+  </p>
+    </section>
+  </body>
+</html>
