@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <style>
+      body {
+	  font-size: 24px;
+      }
+      
+      pre {
+          background: #1e1e1e;
+          color: #00ff88;
+
+          padding: 15px;
+
+	  font-size: 10px;
+
+          border-radius: 15px;
+
+          overflow-x: auto;
+      }
+
+      code {
+          font-family: monospace;
+          font-size: 16px;
+      }
+    </style>
+
+    <title>gitコマンド一覧</title>
+
+  </head>
+
+  <body>
+    # Gitの状態を確認
+    <pre><code>$ git status</code></pre>
+
+    # ファイルをステージング
+    <pre><code>$ git add ファイル名
+$ git add .</code></pre>
+
+    # コミット
+    <pre><code>$ git commit -m "コミットメッセージ"</code></pre>
+
+    # GitHubへプッシュ
+    <pre><code>$ git push</code></pre>
+
+    # GitHubから変更を取得
+    <pre><code>$ git pull</code></pre>
+
+    # ブランチ一覧
+    <pre><code>$ git branch</code></pre>
+
+    # ブランチ作成
+    <pre><code>$ git branch ブランチ名</code></pre>
+
+    # ブランチ切り替え
+    <pre><code>$ git switch ブランチ名</code></pre>
+
+    # ブランチ作成 + 切り替え
+    <pre><code>$ git switch -c ブランチ名</code></pre>
+
+    # リモートリポジトリを確認
+    <pre><code>$ git remote -v</code></pre>
+
+    # リポジトリをクローン
+    <pre><code>$ git clone URL</code></pre>
+
+    # コミット履歴を確認
+    <pre><code>$ git log</code></pre>
+
+    # 直前のコミットを確認しやすく表示
+    <pre><code>$ git log --oneline</code></pre>
+
+    # GitHubの変更を反映するとき
+    <pre><code>$ git pull</code></pre>
