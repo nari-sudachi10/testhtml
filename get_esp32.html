@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      body {
+	  font-size: 24px;
+      }
+      
+      pre {
+	  background: #1e1e1e;
+	  color: #00ff88;
+	  padding: 15px;
+	  font-size: 10px;
+	  border-radius: 15px;
+	  overflow-x: auto;
+      }
+
+      code {
+	  font-family: monospace;
+	  font-size: 16px;
+      }
+    </style>
+    
+    <title>センサーから値を取得する</title>
+  </head>
+
+  <body>
+    <h2>センサーから値を取得する</h2>
+
+    <p>
+      AHT20+BMP280/BME2803 in 1というセンサーを使って部屋の気温と湿度と気圧を取得します
+    </p>
+
+    <h3>1.IC2デバイスの確認</h3>
+
+    <p>まずセンサーが認識できるか確認するためにIC2スキャナを作成します</p>
+
+    <pre><code>
+#include <Wire.h>
+
+#define SDA_PIN 4
+#define SCL_PIN 5
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  Wire.begin(SDA_PIN, SCL_PIN);
+
+  Serial.println("I2C Scanner");
+}
+
+void loop() {
+  Serial.println("Scanning...");
+
+  int count = 0;
+
+  for (byte address = 1; address < 127; address++) {
+    Wire.beginTransmission(address);
+
+    byte error = Wire.endTransmission();
+
+    if (error == 0) {
+      Serial.print("I2C device found at 0x");
+
+      if (address < 16) {
+        Serial.print("0");
+      }
+
+      Serial.println(address, HEX);
+      count++;
+    }
+  }
+
+  if (count == 0) {
+    Serial.println("No I2C devices found.");
+  }
+
+  Serial.println("-----");
+
+  delay(3000);
+}
+		    </code></pre>
+    <p>
+      プログラムを保存したあと、メニューバーにある書き込みボタンを押してください。
+      その後、ツール→シリアルモニターを開いてください。通信速度を115200にすると結果が出てくるはずです
+    </p>
+
+    <pre><code>
+	Scanning...
+	I2C device found at 0x38
+	I2C device found at 0x77
+    </code></pre>
+
+    <p>
+      こんな感じに表示されていたらOK！<br>
+      ＊もしうまく表示されない場合ESP32にあるEN/RSTボタンを押してみてください
+    </p>
+    
+    
+  </body>
+</html>
