@@ -119,6 +119,66 @@
 
       }
 
+      /* ESP32センサーモニター */
+      .sensor-section {
+	  width: 90%;
+	  max-width: 1000px;
+	  margin: 40px auto;
+      }
+
+      .sensor-status {
+	  text-align: center;
+	  color: #666;
+	  margin-bottom: 20px;
+      }
+
+      .sensor-grid {
+	  display: grid;
+	  grid-template-columns: repeat(3, minmax(0, 1fr));
+	  gap: 20px;
+      }
+
+      .sensor-card {
+	  padding: 25px;
+	  background: white;
+	  border-radius: 20px;
+	  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+	  text-align: center;
+      }
+
+      .sensor-card h3 {
+	  font-size: 20px;
+	  margin-bottom: 15px;
+      }
+
+      .sensor-value {
+	  font-size: 32px;
+	  font-weight: bold;
+	  color: #2563eb;
+      }
+
+      .sensor-unit {
+	  font-size: 16px;
+	  color: #666;
+      }
+
+      .sensor-updated {
+	  text-align: center;
+	  color: #777;
+	  margin-top: 20px;
+	  font-size: 14px;
+      }
+
+      @media (max-width: 768px) {
+	  .sensor-section {
+              width: 100%;
+	  }
+
+	  .sensor-grid {
+              grid-template-columns: 1fr;
+	  }
+      }
+
       .button{
 
 	  display:inline-block;
@@ -200,6 +260,48 @@
     <div class="message">
       MY HOME
     </div>
+
+    <h1>🌡️ ESP32 Sensor Monitor</h1>
+
+    <section class="sensor-section">
+
+      <p class="sensor-status" id="sensor-status">
+	センサーデータを取得しています...
+      </p>
+
+      <div class="sensor-grid">
+
+	<div class="sensor-card">
+	  <h3>🌡️ 温度</h3>
+	  <div>
+            <span class="sensor-value" id="temperature">--</span>
+            <span class="sensor-unit">℃</span>
+	  </div>
+	</div>
+
+	<div class="sensor-card">
+	  <h3>💧 湿度</h3>
+	  <div>
+            <span class="sensor-value" id="humidity">--</span>
+            <span class="sensor-unit">%</span>
+	  </div>
+	</div>
+
+	<div class="sensor-card">
+	  <h3>🌤️ 気圧</h3>
+	  <div>
+            <span class="sensor-value" id="pressure">--</span>
+            <span class="sensor-unit">hPa</span>
+	  </div>
+	</div>
+
+      </div>
+
+      <p class="sensor-updated">
+	最終更新：<span id="measured-at">--</span>
+      </p>
+
+    </section>
 
     <h1>💻 Web Applications</h1>
 
@@ -338,6 +440,60 @@
       © 2026 MY HOME
 
     </footer>
+
+    <script>
+      async function updateSensorData() {
+	  const status = document.getElementById("sensor-status");
+
+	  try {
+              const response = await fetch(
+		  "./get_sensor.php?t=" + Date.now(),
+		  { cache: "no-store" }
+              );
+
+              if (!response.ok) {
+		  throw new Error("HTTP " + response.status);
+              }
+
+              const result = await response.json();
+
+              if (!result.success) {
+		  throw new Error(result.message || "データ取得失敗");
+              }
+
+              const data = result.data;
+
+              document.getElementById("temperature").textContent =
+		  Number(data.temperature).toFixed(2);
+
+              document.getElementById("humidity").textContent =
+		  Number(data.humidity).toFixed(2);
+
+              document.getElementById("pressure").textContent =
+		  Number(data.pressure).toFixed(2);
+
+              const measuredAt = new Date(data.measured_at);
+
+              document.getElementById("measured-at").textContent =
+		  isNaN(measuredAt.getTime())
+                  ? data.measured_at
+                  : measuredAt.toLocaleString("ja-JP");
+
+              status.textContent = "センサーデータを取得しました";
+
+	  } catch (error) {
+              console.error("Sensor API error:", error);
+              status.textContent =
+		  "センサーデータを取得できませんでした";
+	  }
+      }
+
+      // ページを開いたときに取得
+      updateSensorData();
+
+      // 10秒ごとに更新
+      setInterval(updateSensorData, 10000);
+    </script>
 
   </body>
 </html>
